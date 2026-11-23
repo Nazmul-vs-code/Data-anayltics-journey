@@ -154,6 +154,69 @@ set `date` = str_to_date(`date`, '%m/%d/%Y')
 alter table layoff_staging2
 modify column `date` date;
 
+
+-- ** Working with Null and blank values **
+
+select *
+from layoff_staging2
+where total_laid_off is null
+and percentage_laid_off is null
+;
+
+
+select *
+from layoff_staging2
+where industry is null
+or industry = ''
+;
+
+select *
+from layoff_staging2
+where company = 'Airbnb'
+;
+
+select *
+from layoff_staging2 as t1
+join layoff_staging2 as t2
+	on t1.company = t2.company
+	and t1.location = t2.location
+where ( t1.industry is null or t1.industry = '' )
+and ( t2.industry is not null or t2.industry != '' )
+;
+
+-- let's update
+
+update layoff_staging2 
+set layoff_staging2.industry = null
+where layoff_staging2.industry = ''
+;
+
+update layoff_staging2 as t1
+join layoff_staging2 as t2
+	on t1.company = t2.company
+set t1.industry = t2.industry
+where ( t1.industry is NULL  )
+and ( t2.industry is not NULL )
+;
+
+-- Deleting now the unncessary layoff columns
+select *
+from layoff_staging2
+where total_laid_off is null
+and percentage_laid_off is null
+;
+
+delete
+from layoff_staging2
+where total_laid_off is null
+and percentage_laid_off is null
+;
+
+-- ** Let's delete the row_num column **
+
+alter table layoff_staging2
+drop column row_num;
+
 -- temp check
 select *
 from layoff_staging2
